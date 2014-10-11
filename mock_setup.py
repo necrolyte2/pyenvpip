@@ -7,9 +7,6 @@ from setuptools import setup, find_packages
 from setuptools.dist import Distribution
 dist = Distribution()
 setuptools_install = dist.get_command_class('install')
-
-import sys
-
 class MyInstall(setuptools_install):
     def run(self):
         klass = dist.get_command_obj('envpipinstall')

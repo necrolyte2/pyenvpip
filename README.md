@@ -33,17 +33,21 @@ setup.py
 ```
 from setuptools.dist import Distribution
 dist = Distribution()
-klass = dist.get_command_class('pyenvpipinstall')
-class MyInstall(klass):
+setuptools_install = dist.get_command_class('install')
+class MyInstall(setuptools_install):
     def run(self):
-        klass.run(self)
+        klass = dist.get_command_obj('envpipinstall')
+        klass.ensure_finalized()
+        klass.run()
+        klass.mod_klass_prefix_attributes(self)
+        setuptools_install.run(self)
 
 setup(
     setup_requires = [
         'pyenvpip',
     ],
     cmdclass = {
-        'bdist_egg': MyInstall,
+        'install': MyInstall,
     }
 )
 ```
