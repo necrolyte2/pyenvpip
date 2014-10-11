@@ -29,12 +29,12 @@ setup(
     py_modules = [
         'pyenvpip'
     ],
-    license = 'GPLv2',
+    license = 'GPLv3',
     entry_points = {
         'distutils.commands': [
             'install_virtualenv = pyenvpip:InstallVenv',
             'install_with_pip = pyenvpip:InstallWithPip',
-            'pyenvpipinstall = pyenvpip:PyEnvPipInstall',
+            'envpipinstall = pyenvpip:EnvPipInstall',
         ]
     },
 )

@@ -1,6 +1,6 @@
 from glob import glob
 import sys
-from os.path import exists, join, isdir, basename
+from os.path import exists, join, isdir, basename, isabs, abspath
 import os
 import subprocess
 
@@ -28,6 +28,9 @@ class InstallVenv(setuptools.Command):
         # Set default for venvpath to venv
         if self.venvpath is None:
             self.venvpath = 'venv'
+        # Ensure absolute path
+        if not isabs(self.venvpath):
+            self.venvpath = abspath(self.venvpath)
 
     def run(self):
         if self.venvpath is not None \
@@ -44,6 +47,44 @@ class InstallVenv(setuptools.Command):
             return True
         return False
 
+    def mod_klass_prefix_attributes(self, klass):
+        '''
+        Modify all prefixes so installation goes into this virtualenv
+        '''
+        prefix = self.venvpath
+        # Gets 2.6, 2.7 ...
+        v=sys.version_info[:2]
+        # python2.6, python2.7 ...
+        pyver = 'python{0}.{1}'.format(*v)
+        bindir = join(prefix, 'bin')
+        sitepkgdir = join(prefix,'lib',pyver,'site-packages')
+        site64pkgdir = sitepkgdir.replace('lib','lib64')
+
+        prefix_attrs = (
+            'exec_prefix',
+            'install_platbase',
+            'install_base',
+            'install_data',
+            'prefix',
+            # Config vars
+            'platbase',
+            'base',
+            'sys_prefix',
+            'exec_prefix',
+            'sys_exec_prefix',
+        )
+        for p in prefix_attrs:
+            setattr(klass, p, prefix)
+            klass.config_vars[p] = prefix
+
+        sitepkg_attrs = (
+            'install_lib_base',
+            'install_purelib',
+            'install_lib',
+        )
+        for p in sitepkg_attrs:
+            setattr(klass, p, sitepkgdir)
+
     def install_virtualenv(self, *virtenvoptions):
         print "Installing virtualenv {0}".format(virtenvoptions[0])
         # Find virtualenv.py in sys.paths which should be a .egg directory
@@ -54,7 +95,7 @@ class InstallVenv(setuptools.Command):
         if not vpth:
             raise Exception("Could not find virtualenv.py path")
         subprocess.check_call(
-            ['python',vpth] + list(virtenvoptions)
+            [sys.executable,vpth] + list(virtenvoptions)
         )
 
     def activate_virtualenv(self, venvpth):
@@ -88,17 +129,16 @@ class InstallWithPip(setuptools.Command):
         print "Installing all requirements from {0}".format(reqfile)
         check_call( ['pip','install','-r',reqfile] )
 
-class PyEnvPipInstall(_bdist_egg, InstallVenv, InstallWithPip):
+class EnvPipInstall(InstallVenv, InstallWithPip):
     description = 'Installs virtualenv and utilizes pip instead ' \
                     'of easy_install for dependencies'
 
     # Hacky McHackerton
     __mro__ = [
-        _bdist_egg, InstallVenv, InstallWithPip
+        InstallVenv, InstallWithPip
     ]
 
-    user_options = _bdist_egg.user_options + \
-            InstallWithPip.user_options + \
+    user_options = InstallWithPip.user_options + \
             InstallVenv.user_options
 
     def _lazy_caller(self, objects, method):
@@ -107,15 +147,15 @@ class PyEnvPipInstall(_bdist_egg, InstallVenv, InstallWithPip):
 
     def initialize_options(self):
         self._lazy_caller(
-            PyEnvPipInstall.__mro__, 'initialize_options'
+            EnvPipInstall.__mro__, 'initialize_options'
         )
 
     def finalize_options(self):
         self._lazy_caller(
-            PyEnvPipInstall.__mro__, 'finalize_options'
+            EnvPipInstall.__mro__, 'finalize_options'
         )
 
     def run(self):
         self._lazy_caller(
-            PyEnvPipInstall.__mro__, 'run'
+            EnvPipInstall.__mro__, 'run'
         )
