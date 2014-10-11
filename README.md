@@ -21,7 +21,7 @@ This will add 3 new commands to your setup.py
 - install_with_pip
   - Uses a requirements.txt file to run pip install -r with
 - pyenvpipinstall
-  - Essentially runs install_virtualenv, then install_with_pip followed by a regular setup.py install
+  - Essentially runs install_virtualenv, then install_with_pip
 
 
 # Advanced Usage
@@ -52,4 +52,4 @@ setup(
 )
 ```
 
-This essentially patches the normal install process such that it runs the PyEnvPipInstall class instead.
+This essentially patches the normal install process such that it runs the EnvPipInstall class instead.
