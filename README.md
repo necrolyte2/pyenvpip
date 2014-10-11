@@ -52,4 +52,4 @@ setup(
 )
 ```
 
-This essentially patches the normal bdist_egg process such that it runs the PyEnvPipInstall class instead.
+This essentially patches the normal install process such that it runs the PyEnvPipInstall class instead.
