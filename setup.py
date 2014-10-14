@@ -16,6 +16,7 @@ setup(
         'mock'
     ],
     setup_requires = [
+        'nose',
         'virtualenv',
         'pip',
     ],

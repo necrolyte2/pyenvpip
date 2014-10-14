@@ -33,6 +33,9 @@ class InstallVenv(setuptools.Command):
             self.venvpath = abspath(self.venvpath)
 
     def run(self):
+        '''
+        Runs virtualenv creation as well as activation
+        '''
         if self.venvpath is not None \
             and not isdir(self.venvpath):
             self.install_virtualenv(self.venvpath)
